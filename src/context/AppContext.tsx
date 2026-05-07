@@ -1,63 +1,127 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { Campaign, Script, Render, AppStats } from '@/lib/types';
-import {
-  EMPTY_STATS,
-  buildMockCampaign,
-  buildMockScripts,
-  buildMockRenders,
-  DEMO_CAMPAIGN_DATA,
-} from '@/lib/mock-data';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { api, type ApiCampaign, type ApiScript, type ApiRender } from '@/lib/api';
+import type { AppStats } from '@/lib/types';
+import { EMPTY_STATS } from '@/lib/mock-data';
+
+interface GenerateCampaignInput {
+  productName: string;
+  productUrl: string;
+  productDescription: string;
+  niche: string;
+  targetAudience: string;
+  claimsAndProof: string;
+  scriptTone: string;
+  voiceStyle: string;
+}
 
 interface AppContextType {
-  activeCampaign: Campaign | null;
-  scripts: Script[];
-  renders: Render[];
+  activeCampaign: ApiCampaign | null;
+  scripts: ApiScript[];
+  renders: ApiRender[];
   stats: AppStats;
-  generateCampaign: (data: Partial<Campaign>) => void;
-  loadDemo: () => void;
-  clearCampaign: () => void;
+  isGenerating: boolean;
+  generateCampaign: (data: GenerateCampaignInput) => Promise<void>;
+  loadDemo: () => Promise<void>;
+  refreshRenders: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null);
-  const [scripts, setScripts] = useState<Script[]>([]);
-  const [renders, setRenders] = useState<Render[]>([]);
+  const [activeCampaign, setActiveCampaign] = useState<ApiCampaign | null>(null);
+  const [scripts, setScripts] = useState<ApiScript[]>([]);
+  const [renders, setRenders] = useState<ApiRender[]>([]);
   const [stats, setStats] = useState<AppStats>(EMPTY_STATS);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const applyGeneration = useCallback((data: Partial<Campaign>) => {
-    const campaign = buildMockCampaign(data);
-    const newScripts = buildMockScripts(campaign.id);
-    const newRenders = buildMockRenders(newScripts);
+  const refreshStats = useCallback(async () => {
+    try {
+      const s = await api.getStats();
+      setStats({ campaigns: s.campaigns, scripts: s.scripts, renders: s.renders, avgScore: s.avg_score });
+    } catch {
+      // backend may not be running yet
+    }
+  }, []);
+
+  const loadCampaignData = useCallback(async (campaign: ApiCampaign) => {
     setActiveCampaign(campaign);
-    setScripts(newScripts);
-    setRenders(newRenders);
-    setStats({
-      campaigns: 1,
-      scripts: newScripts.length,
-      renders: newRenders.length,
-      avgScore: 7.2,
-    });
-  }, []);
+    const [fetchedScripts, fetchedRenders] = await Promise.all([
+      api.getScripts(campaign.id),
+      api.getRenders(campaign.id),
+    ]);
+    setScripts(fetchedScripts);
+    setRenders(fetchedRenders);
+    await refreshStats();
+  }, [refreshStats]);
 
-  const generateCampaign = useCallback((data: Partial<Campaign>) => {
-    applyGeneration(data);
-  }, [applyGeneration]);
+  const generateCampaign = useCallback(async (data: GenerateCampaignInput) => {
+    setIsGenerating(true);
+    try {
+      const campaign = await api.createCampaign({
+        product_name: data.productName,
+        product_url: data.productUrl,
+        product_description: data.productDescription,
+        niche: data.niche,
+        target_audience: data.targetAudience,
+        claims_and_proof: data.claimsAndProof,
+        script_tone: data.scriptTone,
+        voice_style: data.voiceStyle,
+      });
+      await loadCampaignData(campaign);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [loadCampaignData]);
 
-  const loadDemo = useCallback(() => {
-    applyGeneration(DEMO_CAMPAIGN_DATA);
-  }, [applyGeneration]);
+  const loadDemo = useCallback(async () => {
+    setIsGenerating(true);
+    try {
+      const campaign = await api.createCampaign({
+        product_name: 'RadiantLab Vitamin C Serum',
+        product_url: 'https://example.com/radiantlab-serum',
+        product_description: 'A lightweight vitamin C serum for people who want brighter-looking skin without a sticky finish.',
+        niche: 'dtc-skincare',
+        target_audience: 'Busy women aged 25–40 who buy skincare from TikTok',
+        claims_and_proof: 'Absorbs in under 30 seconds; fragrance-free; visibly improves dullness',
+        script_tone: 'casual-founder',
+        voice_style: 'warm-authentic',
+      });
+      await loadCampaignData(campaign);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [loadCampaignData]);
 
-  const clearCampaign = useCallback(() => {
-    setActiveCampaign(null);
-    setScripts([]);
-    setRenders([]);
-    setStats(EMPTY_STATS);
-  }, []);
+  const refreshRenders = useCallback(async () => {
+    if (!activeCampaign) return;
+    const fetchedRenders = await api.getRenders(activeCampaign.id);
+    setRenders(fetchedRenders);
+  }, [activeCampaign]);
+
+  // Restore most recent campaign on mount
+  useEffect(() => {
+    api.listCampaigns()
+      .then(async (campaigns) => {
+        if (campaigns.length > 0) {
+          await loadCampaignData(campaigns[0]);
+        } else {
+          await refreshStats();
+        }
+      })
+      .catch(() => refreshStats());
+  }, [loadCampaignData, refreshStats]);
 
   return (
-    <AppContext.Provider value={{ activeCampaign, scripts, renders, stats, generateCampaign, loadDemo, clearCampaign }}>
+    <AppContext.Provider value={{
+      activeCampaign,
+      scripts,
+      renders,
+      stats,
+      isGenerating,
+      generateCampaign,
+      loadDemo,
+      refreshRenders,
+    }}>
       {children}
     </AppContext.Provider>
   );

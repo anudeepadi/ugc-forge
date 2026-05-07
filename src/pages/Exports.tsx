@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useApp } from "@/context/AppContext";
+import { api } from "@/lib/api";
 
 const FORMAT_OPTIONS = [
   { value: "zip", label: "ZIP with videos + metadata" },
@@ -15,7 +16,7 @@ const FORMAT_OPTIONS = [
 
 export function Exports() {
   const navigate = useNavigate();
-  const { renders, scripts } = useApp();
+  const { renders, scripts, activeCampaign } = useApp();
   const [format, setFormat] = useState("zip");
   const [includeScores, setIncludeScores] = useState(true);
   const [includeScriptText, setIncludeScriptText] = useState(true);
@@ -27,6 +28,10 @@ export function Exports() {
   );
 
   function handleExport() {
+    if (activeCampaign && format === "csv") {
+      window.location.href = api.getExportUrl(activeCampaign.id);
+      return;
+    }
     setExporting(true);
     setTimeout(() => {
       setExporting(false);

@@ -1,73 +1,81 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Wand2, CheckCircle2 } from 'lucide-react';
-import { SectionHeader } from '@/components/editorial/SectionHeader';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { useApp } from '@/context/AppContext';
-import type { Campaign } from '@/lib/types';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Wand2, CheckCircle2 } from "lucide-react";
+import { SectionHeader } from "@/components/editorial/SectionHeader";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Select } from "@/components/ui/Select";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { useApp } from "@/context/AppContext";
 
 const NICHE_OPTIONS = [
-  { value: 'dtc-skincare', label: 'DTC skincare' },
-  { value: 'supplements', label: 'Supplements' },
-  { value: 'fitness', label: 'Fitness' },
-  { value: 'tech-gadgets', label: 'Tech gadgets' },
-  { value: 'home-goods', label: 'Home goods' },
-  { value: 'apparel', label: 'Apparel' },
+  { value: "dtc-skincare", label: "DTC skincare" },
+  { value: "supplements", label: "Supplements" },
+  { value: "fitness", label: "Fitness" },
+  { value: "tech-gadgets", label: "Tech gadgets" },
+  { value: "home-goods", label: "Home goods" },
+  { value: "apparel", label: "Apparel" },
 ];
 
 const TONE_OPTIONS = [
-  { value: 'casual-founder', label: 'Casual founder' },
-  { value: 'energetic-hype', label: 'Energetic hype' },
-  { value: 'calm-expert', label: 'Calm expert' },
-  { value: 'relatable-user', label: 'Relatable user' },
+  { value: "casual-founder", label: "Casual founder" },
+  { value: "energetic-hype", label: "Energetic hype" },
+  { value: "calm-expert", label: "Calm expert" },
+  { value: "relatable-user", label: "Relatable user" },
 ];
 
 const VOICE_OPTIONS = [
-  { value: 'warm-authentic', label: 'Warm & authentic' },
-  { value: 'direct-punchy', label: 'Direct & punchy' },
-  { value: 'soft-empathetic', label: 'Soft & empathetic' },
-  { value: 'high-energy', label: 'High energy' },
+  { value: "warm-authentic", label: "Warm & authentic" },
+  { value: "direct-punchy", label: "Direct & punchy" },
+  { value: "soft-empathetic", label: "Soft & empathetic" },
+  { value: "high-energy", label: "High energy" },
 ];
 
-type FormData = Omit<Campaign, 'id' | 'createdAt' | 'status'>;
+interface FormData {
+  productName: string;
+  productUrl: string;
+  productDescription: string;
+  niche: string;
+  targetAudience: string;
+  claimsAndProof: string;
+  scriptTone: string;
+  voiceStyle: string;
+}
 
 const INITIAL: FormData = {
-  productName: '',
-  niche: 'dtc-skincare',
-  productUrl: '',
-  productDescription: '',
-  targetAudience: '',
-  claimsAndProof: '',
-  scriptTone: 'casual-founder',
-  voiceStyle: 'warm-authentic',
+  productName: "",
+  niche: "dtc-skincare",
+  productUrl: "",
+  productDescription: "",
+  targetAudience: "",
+  claimsAndProof: "",
+  scriptTone: "casual-founder",
+  voiceStyle: "warm-authentic",
 };
 
 export function Factory() {
   const navigate = useNavigate();
-  const { generateCampaign } = useApp();
+  const { generateCampaign, isGenerating } = useApp();
   const [form, setForm] = useState<FormData>(INITIAL);
-  const [generating, setGenerating] = useState(false);
 
-  const isValid = form.productName.trim() !== '' && form.productDescription.trim() !== '';
+  const isValid =
+    form.productName.trim() !== "" && form.productDescription.trim() !== "";
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  function handleChange(
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isValid) return;
-    setGenerating(true);
-    setTimeout(() => {
-      generateCampaign(form);
-      setGenerating(false);
-      navigate('/scripts');
-    }, 1800);
+    if (!isValid || isGenerating) return;
+    await generateCampaign(form);
+    navigate("/scripts");
   }
 
   return (
@@ -171,9 +179,12 @@ export function Factory() {
         <div className="sticky top-8">
           <Card className="p-6">
             <div className="mb-5 pb-5 border-b border-gray-light">
-              <Badge variant="default" className="mb-2">Mock-safe generation</Badge>
+              <Badge variant="default" className="mb-2">
+                Mock-safe generation
+              </Badge>
               <p className="text-xs text-gray-mid mt-2 leading-relaxed">
-                No external AI calls yet. The backend returns deterministic assets for reliable testing.
+                No external AI calls yet. The backend returns deterministic
+                assets for reliable testing.
               </p>
             </div>
 
@@ -188,8 +199,16 @@ export function Factory() {
             <div className="mb-6">
               <p className="text-label text-gray-mid mb-3">v1 output</p>
               <ul className="space-y-2">
-                {['Six UGC scripts', 'Six render queue items', 'Viral score estimates', 'CSV export'].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-black">
+                {[
+                  "Six UGC scripts",
+                  "Six render queue items",
+                  "Viral score estimates",
+                  "CSV export",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-center gap-2 text-sm text-black"
+                  >
                     <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
                     {item}
                   </li>
@@ -201,11 +220,11 @@ export function Factory() {
               variant="primary"
               size="lg"
               className="w-full"
-              disabled={!isValid || generating}
+              disabled={!isValid || isGenerating}
               onClick={handleSubmit}
             >
               <Wand2 className="w-4 h-4" />
-              {generating ? 'Generating…' : 'Generate campaign'}
+              {isGenerating ? "Generating…" : "Generate campaign"}
             </Button>
           </Card>
         </div>
