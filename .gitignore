@@ -1,13 +1,49 @@
 node_modules/
 dist/
 build/
+
+# Environment variables (may contain secrets)
 .env
 .env.local
+.env.*.local
+.env.production
+.env.development
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Testing
 coverage/
+.pytest_cache/
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.Python
+*.egg-info/
+dist-backend/
+
+# Backend data and secrets
 backend/data/
-backend/.pytest_cache/
+backend/.env
+backend/.env.local
+backend/.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.tsbuildinfo
