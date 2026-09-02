@@ -1,4 +1,11 @@
-const BASE = 'http://localhost:8000/api/v1';
+import { demoApi, initializeDemoData } from './demo-api';
+
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+
+if (DEMO_MODE) {
+  initializeDemoData();
+}
 
 export interface ApiCampaign {
   id: string;
@@ -60,36 +67,95 @@ export interface CreateCampaignPayload {
   voice_style: string;
 }
 
+let apiUnavailable = false;
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`API ${res.status}: ${text}`);
+  if (DEMO_MODE || apiUnavailable) {
+    throw new Error('API_UNAVAILABLE');
   }
-  return res.json() as Promise<T>;
+  
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`API ${res.status}: ${text}`);
+    }
+    return res.json() as Promise<T>;
+  } catch (error) {
+    if (error instanceof TypeError) {
+      apiUnavailable = true;
+      initializeDemoData();
+      throw new Error('API_UNAVAILABLE');
+    }
+    throw error;
+  }
 }
 
 export const api = {
-  createCampaign: (payload: CreateCampaignPayload) =>
-    request<ApiCampaign>('/campaigns', { method: 'POST', body: JSON.stringify(payload) }),
+  createCampaign: async (payload: CreateCampaignPayload): Promise<ApiCampaign> => {
+    try {
+      return await request<ApiCampaign>('/campaigns', { method: 'POST', body: JSON.stringify(payload) });
+    } catch (error) {
+      if ((error as Error).message === 'API_UNAVAILABLE') {
+        return demoApi.createCampaign(payload);
+      }
+      throw error;
+    }
+  },
 
-  listCampaigns: () =>
-    request<ApiCampaign[]>('/campaigns'),
+  listCampaigns: async (): Promise<ApiCampaign[]> => {
+    try {
+      return await request<ApiCampaign[]>('/campaigns');
+    } catch (error) {
+      if ((error as Error).message === 'API_UNAVAILABLE') {
+        return demoApi.listCampaigns();
+      }
+      throw error;
+    }
+  },
 
-  getStats: () =>
-    request<ApiStats>('/campaigns/stats'),
+  getStats: async (): Promise<ApiStats> => {
+    try {
+      return await request<ApiStats>('/campaigns/stats');
+    } catch (error) {
+      if ((error as Error).message === 'API_UNAVAILABLE') {
+        return demoApi.getStats();
+      }
+      throw error;
+    }
+  },
 
-  getScripts: (campaignId: string) =>
-    request<ApiScript[]>(`/campaigns/${campaignId}/scripts`),
+  getScripts: async (campaignId: string): Promise<ApiScript[]> => {
+    try {
+      return await request<ApiScript[]>(`/campaigns/${campaignId}/scripts`);
+    } catch (error) {
+      if ((error as Error).message === 'API_UNAVAILABLE') {
+        return demoApi.getScripts(campaignId);
+      }
+      throw error;
+    }
+  },
 
-  getRenders: (campaignId: string) =>
-    request<ApiRender[]>(`/campaigns/${campaignId}/renders`),
+  getRenders: async (campaignId: string): Promise<ApiRender[]> => {
+    try {
+      return await request<ApiRender[]>(`/campaigns/${campaignId}/renders`);
+    } catch (error) {
+      if ((error as Error).message === 'API_UNAVAILABLE') {
+        return demoApi.getRenders(campaignId);
+      }
+      throw error;
+    }
+  },
 
-  getExportUrl: (campaignId: string) =>
-    `${BASE}/campaigns/${campaignId}/export`,
+  getExportUrl: (campaignId: string): string => {
+    if (DEMO_MODE || apiUnavailable) {
+      return demoApi.getExportUrl(campaignId);
+    }
+    return `${BASE}/campaigns/${campaignId}/export`;
+  },
 
   watchRender: (
     renderId: string,
@@ -100,6 +166,10 @@ export const api = {
       error_message: string | null;
     }) => void,
   ): (() => void) => {
+    if (DEMO_MODE || apiUnavailable) {
+      return demoApi.watchRender(renderId, onUpdate);
+    }
+    
     const ws = new WebSocket(`ws://localhost:8000/api/v1/ws/${renderId}`);
     ws.onmessage = (evt) => {
       const data = JSON.parse(evt.data as string);
