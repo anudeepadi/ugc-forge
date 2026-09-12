@@ -32,7 +32,7 @@ Open [localhost:3000](http://localhost:3000). Demo campaigns and progress are si
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TD
     UI["React and TypeScript workspace"] --> Client["API client"]
     Client -->|demo mode or network fallback| Demo["Browser-local demo data"]
     Client -->|HTTP| API["FastAPI routes"]
