@@ -6,6 +6,10 @@ UGC Forge organizes a product brief into campaigns, script variants, queued rend
 
 **Status:** prototype. The browser demo uses simulated data; the backend defaults to stub providers. Generated scores are not validated predictions of advertising performance.
 
+![UGC Forge showing a simulated campaign and script variants](docs/images/campaign-scripts.png)
+
+*Actual local browser demo. Scripts, progress, scores and render URLs are simulated; this image does not show generated video.*
+
 [Quick start](#quick-start) · [Architecture](#architecture) · [Backend setup](#backend-setup) · [Development](#development)
 
 ## What is included
@@ -28,6 +32,15 @@ VITE_DEMO_MODE=true npm run dev
 ```
 
 Open [localhost:3000](http://localhost:3000). Demo campaigns and progress are simulated in browser memory and reset on reload; they do not invoke paid providers or publish advertisements.
+
+## Try the workflow
+
+1. Start in **Command** to inspect the seeded example campaign.
+2. Open **Factory**, enter a product name and description, then select **Generate campaign**.
+3. Inspect the six sample variants in **Scripts** and the simulated queue in **Renders**.
+4. Reload the page to return to the seed data. Browser changes are not persisted.
+
+The browser demo does not generate playable videos or downloadable export archives. The script templates remain the same skincare sample regardless of the product entered. Scores are random sample values, render links are placeholders, and export completion states are UI demonstrations. With a running backend, the CSV route can export script metadata; ZIP/JSON packaging is not implemented by the frontend.
 
 ## Architecture
 
@@ -94,6 +107,10 @@ Provider credentials belong only in the backend environment. See [backend/.env.e
 | [backend/app/providers/](backend/app/providers/) | Replaceable generation adapters |
 | [backend/app/workers/pipeline.py](backend/app/workers/pipeline.py) | Speech, avatar, storage, and progress stages |
 | [backend/alembic/](backend/alembic/) | Database migrations |
+
+## Verification
+
+The frontend production build and the local campaign → six scripts → render-queue walkthrough were checked on 22 September 2026 with Node.js 26.9.0. This is a check of the browser demo; paid providers and the Docker backend were not exercised in that pass.
 
 ## Development
 
