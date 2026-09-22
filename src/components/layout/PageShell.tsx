@@ -24,6 +24,11 @@ export function PageShell({ children, className }: PageShellProps) {
           exit="exit"
           transition={pageTransition}
         >
+          {import.meta.env.VITE_DEMO_MODE === 'true' && (
+            <p className="mb-6 border border-white/20 px-4 py-3 text-sm text-white/70">
+              Demo mode · Sample scripts, scores and render progress. No videos or downloads are generated.
+            </p>
+          )}
           {children}
         </motion.main>
       </AnimatePresence>

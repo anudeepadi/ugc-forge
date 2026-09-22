@@ -183,15 +183,15 @@ export function Factory() {
                 Mock-safe generation
               </Badge>
               <p className="text-xs text-gray-mid mt-2 leading-relaxed">
-                No external AI calls yet. The backend returns deterministic
-                assets for reliable testing.
+                Demo mode uses sample assets. Backend behavior depends on the
+                configured providers.
               </p>
             </div>
 
             <div className="mb-5 pb-5 border-b border-gray-light">
               <p className="text-label text-gray-mid mb-3">Gatekeeper</p>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-black">Monthly video quota</span>
+                <span className="text-black">Example monthly quota</span>
                 <span className="font-mono font-semibold text-black">120</span>
               </div>
             </div>
@@ -202,8 +202,8 @@ export function Factory() {
                 {[
                   "Six UGC scripts",
                   "Six render queue items",
-                  "Viral score estimates",
-                  "CSV export",
+                  "Sample score values",
+                  "Export workflow preview",
                 ].map((item) => (
                   <li
                     key={item}

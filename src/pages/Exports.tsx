@@ -192,10 +192,10 @@ export function Exports() {
             {exported ? (
               <div className="text-center py-3">
                 <Badge variant="success" className="mb-2">
-                  Export complete
+                  Preview complete
                 </Badge>
                 <p className="text-xs text-gray-mid mt-1">
-                  Download link ready
+                  ZIP and JSON downloads are not implemented in this prototype.
                 </p>
               </div>
             ) : (

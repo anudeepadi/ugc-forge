@@ -30,7 +30,7 @@ export function Sidebar() {
           </div>
           <div>
             <div className="text-white font-semibold text-sm leading-tight">UGC Forge</div>
-            <div className="text-white/40 text-xs">AI content factory</div>
+            <div className="text-white/40 text-xs">Campaign workflow prototype</div>
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@ export function Sidebar() {
 
         {/* Stack status */}
         <div className="mt-8 pt-6 border-t border-white/10">
-          <div className="text-label text-white/30 px-2 mb-3">Stack</div>
+          <div className="text-label text-white/30 px-2 mb-3">Example pipeline</div>
           <ul className="space-y-3">
             {PIPELINE_SERVICES.map((svc) => (
               <li key={svc.name} className="px-2">
@@ -80,7 +80,7 @@ export function Sidebar() {
       {/* Footer */}
       <div className="px-5 py-4 border-t border-white/10">
         <div className="flex items-center justify-between">
-          <span className="text-white/30 text-xs">Open-source pipeline mock</span>
+          <span className="text-white/30 text-xs">Workflow prototype</span>
           <span className="border border-white/20 text-white/40 text-xs px-2 py-0.5 uppercase tracking-wider">
             MVP
           </span>
