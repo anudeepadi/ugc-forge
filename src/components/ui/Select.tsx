@@ -27,7 +27,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           id={fieldId}
           className={cn(
             'w-full px-4 py-3 bg-gray-dark border text-white/90',
-            'focus:outline-none transition-colors duration-200 cursor-pointer',
+            'transition-colors duration-200 cursor-pointer',
             error ? 'border-red-brand' : 'border-white/20 focus:border-red-brand',
             className,
           )}

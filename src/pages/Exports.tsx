@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Download, Package } from "lucide-react";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
@@ -9,51 +8,47 @@ import { useApp } from "@/context/AppContext";
 import { api } from "@/lib/api";
 
 const FORMAT_OPTIONS = [
-  { value: "zip", label: "ZIP with videos + metadata" },
-  { value: "csv", label: "CSV only (script text + metadata)" },
-  { value: "json", label: "JSON data export" },
+  { value: "csv", label: "CSV (script text + render metadata)", available: true },
+  { value: "zip", label: "ZIP with videos + metadata (not implemented)", available: false },
+  { value: "json", label: "JSON data export (not implemented)", available: false },
 ];
+
+const CSV_COLUMNS = [
+  "Render and script IDs",
+  "Hook, body, and CTA",
+  "Score value (illustrative)",
+  "Avatar, voice, and job status",
+  "Video URL, when the backend has one",
+];
+
+const HEADER = {
+  eyebrow: "Export Manager",
+  title: "Export script metadata.",
+  description:
+    "With a running backend, download a CSV of scripts and render-job metadata. The browser demo has no export files, and ZIP or JSON packaging is not implemented.",
+};
 
 export function Exports() {
   const navigate = useNavigate();
-  const { renders, scripts, activeCampaign } = useApp();
-  const [format, setFormat] = useState("zip");
-  const [includeScores, setIncludeScores] = useState(true);
-  const [includeScriptText, setIncludeScriptText] = useState(true);
-  const [exporting, setExporting] = useState(false);
-  const [exported, setExported] = useState(false);
-
-  const readyRenders = renders.filter(
-    (r) => r.status === "queued" || r.status === "complete",
-  );
+  const { renders, activeCampaign } = useApp();
+  const isDemo = api.isDemo();
 
   function handleExport() {
-    if (activeCampaign && format === "csv") {
-      window.location.href = api.getExportUrl(activeCampaign.id);
-      return;
-    }
-    setExporting(true);
-    setTimeout(() => {
-      setExporting(false);
-      setExported(true);
-    }, 1500);
+    if (!activeCampaign || isDemo) return;
+    window.location.href = api.getExportUrl(activeCampaign.id);
   }
 
   if (renders.length === 0) {
     return (
       <div>
-        <SectionHeader
-          eyebrow="Export Manager"
-          title="Package completed renders for testing."
-          description="Batch download renders with metadata for A/B testing across ad platforms."
-        />
+        <SectionHeader {...HEADER} />
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <Package className="w-12 h-12 text-white/20 mb-4" />
           <h3 className="text-white text-xl font-medium mb-2">
             Nothing to export yet
           </h3>
           <p className="text-white/50 text-sm max-w-sm mb-6">
-            Generate a campaign and renders before exporting.
+            Plan a campaign before exporting its script metadata.
           </p>
           <Button variant="primary" onClick={() => navigate("/factory")}>
             Go to factory
@@ -65,105 +60,51 @@ export function Exports() {
 
   return (
     <div>
-      <SectionHeader
-        eyebrow="Export Manager"
-        title="Package completed renders for testing."
-        description="Batch download renders with metadata for A/B testing across ad platforms."
-      />
+      <SectionHeader {...HEADER} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Options */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Batch selection */}
-          <div>
-            <h3 className="text-section-header text-xl text-white mb-4 pb-3 border-b border-white/10">
-              Batch selection
-            </h3>
-            <Card className="p-5 space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="accent-red-brand w-4 h-4"
-                />
-                <span className="text-black text-sm">
-                  All ready renders ({readyRenders.length})
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" className="accent-red-brand w-4 h-4" />
-                <span className="text-black text-sm">
-                  Scripts only ({scripts.length})
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" className="accent-red-brand w-4 h-4" />
-                <span className="text-black text-sm">
-                  High-scoring variants (score ≥ 8.5)
-                </span>
-              </label>
-            </Card>
-          </div>
-
           {/* Format */}
-          <div>
-            <h3 className="text-section-header text-xl text-white mb-4 pb-3 border-b border-white/10">
+          <fieldset>
+            <legend className="text-section-header text-xl text-white mb-4 pb-3 border-b border-white/10 w-full">
               Export format
-            </h3>
+            </legend>
             <Card className="p-5 space-y-3">
               {FORMAT_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
-                  className="flex items-center gap-3 cursor-pointer"
+                  className={
+                    opt.available
+                      ? "flex items-center gap-3 cursor-pointer"
+                      : "flex items-center gap-3 opacity-50"
+                  }
                 >
                   <input
                     type="radio"
                     name="format"
                     value={opt.value}
-                    checked={format === opt.value}
-                    onChange={() => setFormat(opt.value)}
+                    defaultChecked={opt.value === "csv"}
+                    disabled={!opt.available}
                     className="accent-red-brand w-4 h-4"
                   />
                   <span className="text-black text-sm">{opt.label}</span>
                 </label>
               ))}
             </Card>
-          </div>
+          </fieldset>
 
-          {/* Metadata options */}
+          {/* CSV contents */}
           <div>
             <h3 className="text-section-header text-xl text-white mb-4 pb-3 border-b border-white/10">
-              Metadata options
+              CSV contents
             </h3>
-            <Card className="p-5 space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeScores}
-                  onChange={(e) => setIncludeScores(e.target.checked)}
-                  className="accent-red-brand w-4 h-4"
-                />
-                <span className="text-black text-sm">Include viral scores</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeScriptText}
-                  onChange={(e) => setIncludeScriptText(e.target.checked)}
-                  className="accent-red-brand w-4 h-4"
-                />
-                <span className="text-black text-sm">Include script text</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="accent-red-brand w-4 h-4"
-                />
-                <span className="text-black text-sm">
-                  Include render settings
-                </span>
-              </label>
+            <Card className="p-5">
+              <ul className="space-y-2 text-black text-sm list-disc pl-5">
+                {CSV_COLUMNS.map((col) => (
+                  <li key={col}>{col}</li>
+                ))}
+              </ul>
             </Card>
           </div>
         </div>
@@ -174,41 +115,39 @@ export function Exports() {
             <p className="text-label text-gray-mid mb-4">Export preview</p>
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-sm">
-                <span className="text-black">Videos</span>
-                <span className="font-mono text-black">
-                  {readyRenders.length}
-                </span>
+                <span className="text-black">Render job rows</span>
+                <span className="font-mono text-black">{renders.length}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-black">Metadata</span>
-                <span className="font-mono text-black">1 CSV</span>
+                <span className="text-black">Video files</span>
+                <span className="font-mono text-black">0</span>
               </div>
               <div className="flex justify-between text-sm border-t border-gray-light pt-3">
                 <span className="text-black font-medium">Format</span>
-                <span className="font-mono text-black uppercase">{format}</span>
+                <span className="font-mono text-black uppercase">csv</span>
               </div>
             </div>
 
-            {exported ? (
-              <div className="text-center py-3">
-                <Badge variant="success" className="mb-2">
-                  Preview complete
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-full"
+              disabled={isDemo || !activeCampaign}
+              onClick={handleExport}
+            >
+              <Download className="w-4 h-4" />
+              Download CSV
+            </Button>
+            {isDemo && (
+              <div className="text-center pt-4">
+                <Badge variant="default" className="mb-2">
+                  Browser demo
                 </Badge>
                 <p className="text-xs text-gray-mid mt-1">
-                  ZIP and JSON downloads are not implemented in this prototype.
+                  CSV export requires the backend. The demo has no files to
+                  download.
                 </p>
               </div>
-            ) : (
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full"
-                disabled={exporting || readyRenders.length === 0}
-                onClick={handleExport}
-              >
-                <Download className="w-4 h-4" />
-                {exporting ? "Packaging…" : "Export batch"}
-              </Button>
             )}
           </Card>
         </div>

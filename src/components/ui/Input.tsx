@@ -22,7 +22,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           className={cn(
             'w-full px-4 py-3 bg-transparent border text-white/90 placeholder:text-white/30',
-            'focus:outline-none transition-colors duration-200',
+            'transition-colors duration-200',
             error ? 'border-red-brand' : 'border-white/20 focus:border-red-brand',
             className,
           )}

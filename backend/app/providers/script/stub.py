@@ -3,22 +3,22 @@ import asyncio
 from app.providers.base import GeneratedScript, ProductBrief, ScriptProvider
 
 _HOOKS = [
-    "Stop scrolling if you struggle with dull skin.",
-    "Tired of serums that promise everything and deliver nothing?",
-    "Here's why your skincare routine is failing you.",
-    "I used to spend $200/month on skincare. Not anymore.",
-    "This changed my skin in 30 days — and it's fragrance-free.",
-    "Derms won't tell you this. But this serum will.",
+    "What do you look for in a daily serum?",
+    "A closer look at this fictional vitamin C formula.",
+    "Read the ingredients before choosing your next serum.",
+    "A sample routine, built around a simple brief.",
+    "Fragrance-free is one detail to check.",
+    "Three things to ask before trying a new serum."
 ]
 _BODIES = [
-    "I found this lightweight vitamin C serum that actually works. Fragrance-free, absorbs in seconds, costs half what I used to pay.",
-    "Most serums are full of fillers. This one uses stable vitamin C and niacinamide — nothing else. My skin has never looked better.",
-    "I was skeptical too. But after 30 days my dark spots faded and my skin looks brighter. Simple, consistent ingredients.",
+    "This fictional brief describes stable vitamin C, niacinamide and a fragrance-free formula. The sample script repeats those supplied details; it is not a personal testimonial or evidence of results.",
+    "The audience wants ingredient clarity and a lightweight routine. Review the full ingredient list and instructions before deciding whether a real product would fit.",
+    "No clinical study, price comparison or customer result was supplied. A publishable script would need verified evidence for any performance claim."
 ]
 _CTAS = [
-    "Try it risk-free for 30 days.",
-    "Get 20% off your first order.",
-    "Join 10,000+ people who made the switch.",
+    "Read the ingredients and instructions.",
+    "Explore the product details before deciding.",
+    "See whether it fits your daily routine."
 ]
 _SCORES = [9.1, 8.7, 8.4, 8.1, 7.9, 7.3]
 

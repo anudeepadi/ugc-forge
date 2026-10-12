@@ -1,6 +1,6 @@
 
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Factory, FileText, Film, Download, Star } from 'lucide-react';
+import { LayoutDashboard, Factory, FileText, Film, Download, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PIPELINE_SERVICES } from '@/lib/mock-data';
 
@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { to: '/factory', label: 'Factory', icon: Factory, end: false },
   { to: '/scripts', label: 'Scripts', icon: FileText, end: false },
   { to: '/renders', label: 'Renders', icon: Film, end: false },
-  { to: '/scores', label: 'Scores', icon: Star, end: false },
+  { to: '/scores', label: 'Scores', icon: BarChart3, end: false },
   { to: '/exports', label: 'Exports', icon: Download, end: false },
 ];
 
@@ -17,13 +17,14 @@ const STATUS_DOT: Record<string, string> = {
   online: 'bg-success',
   offline: 'bg-red-brand',
   warning: 'bg-warning',
+  example: 'border border-white/40',
 };
 
 export function Sidebar() {
   return (
-    <aside className="fixed inset-y-0 left-0 w-60 bg-black border-r border-white/10 flex flex-col z-40">
+    <aside className="w-full border-b border-white/10 bg-black flex flex-col md:fixed md:inset-y-0 md:left-0 md:w-60 md:border-b-0 md:border-r z-40">
       {/* Logo */}
-      <div className="px-5 py-6 border-b border-white/10">
+      <div className="px-5 py-4 md:py-6 border-b border-white/10">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-red-brand flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm font-mono">UF</span>
@@ -36,9 +37,9 @@ export function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-5">
-        <div className="text-label text-white/30 px-2 mb-3">Workspace</div>
-        <ul className="space-y-0.5">
+      <nav aria-label="Workspace" className="flex-1 overflow-y-auto px-3 py-3 md:py-5">
+        <div className="hidden md:block text-label text-white/30 px-2 mb-3">Workspace</div>
+        <ul className="flex gap-1 overflow-x-auto p-1 md:block md:p-0 md:space-y-0.5">
           {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
             <li key={to}>
               <NavLink
@@ -46,7 +47,7 @@ export function Sidebar() {
                 end={end}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-150',
+                    'flex items-center gap-3 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-150',
                     isActive
                       ? 'bg-red-brand text-white'
                       : 'text-white/70 hover:text-white hover:bg-white/5',
@@ -61,8 +62,11 @@ export function Sidebar() {
         </ul>
 
         {/* Stack status */}
-        <div className="mt-8 pt-6 border-t border-white/10">
+        <div className="hidden md:block mt-8 pt-6 border-t border-white/10">
           <div className="text-label text-white/30 px-2 mb-3">Example pipeline</div>
+          <p className="text-white/40 text-xs px-2 mb-3">
+            Illustrative stages only. The demo does not call model, voice, or avatar providers.
+          </p>
           <ul className="space-y-3">
             {PIPELINE_SERVICES.map((svc) => (
               <li key={svc.name} className="px-2">
@@ -78,7 +82,7 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-5 py-4 border-t border-white/10">
+      <div className="hidden md:block px-5 py-4 border-t border-white/10">
         <div className="flex items-center justify-between">
           <span className="text-white/30 text-xs">Workflow prototype</span>
           <span className="border border-white/20 text-white/40 text-xs px-2 py-0.5 uppercase tracking-wider">

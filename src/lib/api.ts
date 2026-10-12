@@ -95,6 +95,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  isDemo: (): boolean => DEMO_MODE || apiUnavailable,
+
   createCampaign: async (payload: CreateCampaignPayload): Promise<ApiCampaign> => {
     try {
       return await request<ApiCampaign>('/campaigns', { method: 'POST', body: JSON.stringify(payload) });

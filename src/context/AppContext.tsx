@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { api, type ApiCampaign, type ApiScript, type ApiRender } from '@/lib/api';
 import type { AppStats } from '@/lib/types';
 import { EMPTY_STATS } from '@/lib/mock-data';
+
+const SAMPLE_PRODUCT_NAME = 'RadiantLab Vitamin C Serum';
 
 interface GenerateCampaignInput {
   productName: string;
@@ -33,6 +35,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [renders, setRenders] = useState<ApiRender[]>([]);
   const [stats, setStats] = useState<AppStats>(EMPTY_STATS);
   const [isGenerating, setIsGenerating] = useState(false);
+  const loadingDemo = useRef(false);
 
   const refreshStats = useCallback(async () => {
     try {
@@ -74,10 +77,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [loadCampaignData]);
 
   const loadDemo = useCallback(async () => {
+    if (loadingDemo.current) return;
+    loadingDemo.current = true;
     setIsGenerating(true);
     try {
+      // Reopen an existing sample campaign (demo seed or backend) instead of creating a duplicate.
+      const campaigns = await api.listCampaigns();
+      const existing = campaigns.find((c) => c.product_name === SAMPLE_PRODUCT_NAME);
+      if (existing) {
+        await loadCampaignData(existing);
+        return;
+      }
       const campaign = await api.createCampaign({
-        product_name: 'RadiantLab Vitamin C Serum',
+        product_name: SAMPLE_PRODUCT_NAME,
         product_url: 'https://example.com/radiantlab-serum',
         product_description: 'A lightweight vitamin C serum for people who want brighter-looking skin without a sticky finish.',
         niche: 'dtc-skincare',
@@ -88,6 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       await loadCampaignData(campaign);
     } finally {
+      loadingDemo.current = false;
       setIsGenerating(false);
     }
   }, [loadCampaignData]);

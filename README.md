@@ -35,12 +35,13 @@ Open [localhost:3000](http://localhost:3000). Demo campaigns and progress are si
 
 ## Try the workflow
 
-1. Start in **Command** to inspect the seeded example campaign.
-2. Open **Factory**, enter a product name and description, then select **Generate campaign**.
-3. Inspect the six sample variants in **Scripts** and the simulated queue in **Renders**.
-4. Reload the page to return to the seed data. Browser changes are not persisted.
+1. Start in **Command** and select **Load sample campaign** to open the seeded example campaign.
+2. Open **Scripts** and select **Review** on a variant to read its full hook, body, and CTA.
+3. Open the **Renders** sample queue to see one job per script.
+4. Optionally, open **Factory**, enter a product name and description, then select **Generate campaign**.
+5. Reload the page to return to the seed data. Browser changes are not persisted.
 
-The browser demo does not generate playable videos or downloadable export archives. The script templates remain the same skincare sample regardless of the product entered. Scores are random sample values, render links are placeholders, and export completion states are UI demonstrations. With a running backend, the CSV route can export script metadata; ZIP/JSON packaging is not implemented by the frontend.
+The browser demo does not generate playable videos or downloadable export archives, and it shows no video links. The model, voice, avatar, and render stages in the sidebar are labelled examples; the demo does not call them. The script templates remain the same skincare sample regardless of the product entered. Scores are illustrative sample values, not performance predictions. CSV export is disabled in the demo; with a running backend, the CSV route can export script metadata. ZIP/JSON packaging is not implemented.
 
 ## Architecture
 

@@ -59,6 +59,7 @@ export function Factory() {
   const navigate = useNavigate();
   const { generateCampaign, isGenerating } = useApp();
   const [form, setForm] = useState<FormData>(INITIAL);
+  const [error, setError] = useState<string | null>(null);
 
   const isValid =
     form.productName.trim() !== "" && form.productDescription.trim() !== "";
@@ -74,16 +75,23 @@ export function Factory() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!isValid || isGenerating) return;
-    await generateCampaign(form);
-    navigate("/scripts");
+    setError(null);
+    try {
+      await generateCampaign(form);
+      navigate("/scripts");
+    } catch {
+      setError(
+        "The campaign could not be created. Your brief is still here; check that the backend is running and migrated, then try again.",
+      );
+    }
   }
 
   return (
     <div>
       <SectionHeader
         eyebrow="Campaign Factory"
-        title="Describe one product. Generate the testing batch."
-        description="The form acts like the SaaS intake layer: gatekeeper, product context, director constraints, and rendering preferences in one workflow."
+        title="Describe one product. Plan the script batch."
+        description="Capture product context, audience, claims, and creative direction in one brief. In the browser demo, scripts come from fixed skincare templates regardless of the product entered."
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -200,10 +208,9 @@ export function Factory() {
               <p className="text-label text-gray-mid mb-3">v1 output</p>
               <ul className="space-y-2">
                 {[
-                  "Six UGC scripts",
-                  "Six render queue items",
-                  "Sample score values",
-                  "Export workflow preview",
+                  "Six draft scripts to review",
+                  "Six sample render queue items",
+                  "Illustrative score values",
                 ].map((item) => (
                   <li
                     key={item}
@@ -226,6 +233,16 @@ export function Factory() {
               <Wand2 className="w-4 h-4" />
               {isGenerating ? "Generating…" : "Generate campaign"}
             </Button>
+            {!isValid && (
+              <p className="text-xs text-black/70 mt-3">
+                Enter a product name and description to continue.
+              </p>
+            )}
+            {error && (
+              <p role="alert" className="text-xs text-red-brand mt-3">
+                {error}
+              </p>
+            )}
           </Card>
         </div>
       </div>

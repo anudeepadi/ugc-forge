@@ -12,12 +12,12 @@ export interface PageShellProps {
 export function PageShell({ children, className }: PageShellProps) {
   const location = useLocation();
   return (
-    <div className="ml-60 min-h-screen bg-black">
+    <div className="min-w-0 md:ml-60 min-h-screen bg-black">
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
           id="main-content"
-          className={cn('max-w-7xl mx-auto px-8 py-10', className)}
+          className={cn('max-w-7xl mx-auto px-4 py-8 sm:px-8 md:py-10', className)}
           variants={pageVariants}
           initial="initial"
           animate="animate"

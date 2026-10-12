@@ -1,10 +1,10 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
   FileText,
   Film,
-  Star,
   ArrowRight,
   Zap,
 } from "lucide-react";
@@ -18,29 +18,56 @@ import { containerVariants } from "@/lib/animations";
 
 export function Command() {
   const navigate = useNavigate();
-  const { activeCampaign, stats, loadDemo } = useApp();
+  const { activeCampaign, stats, loadDemo, isGenerating } = useApp();
+  const [loadStatus, setLoadStatus] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  async function handleLoadSample() {
+    setLoadError(null);
+    setLoadStatus("Opening sample campaign…");
+    try {
+      await loadDemo();
+      setLoadStatus("Sample campaign open. Review its scripts next.");
+    } catch {
+      setLoadStatus(null);
+      setLoadError(
+        "The sample campaign could not be opened. Check that the backend is running and migrated, then try again.",
+      );
+    }
+  }
 
   return (
     <div>
       <Hero
-        eyebrow="Creative Operations"
-        headline="Generate, score, and export UGC variants."
-        description="Turn one product brief into a batch of UGC ad variants ready for testing."
+        eyebrow="Campaign Planning"
+        headline="Plan UGC campaigns and review scripts."
+        description="Turn one product brief into a campaign with six script variants to review and a sample render queue. The browser demo uses sample data; it does not generate video or call model, voice, or avatar providers."
         cta={{
-          label: "Build a campaign",
+          label: "Plan a campaign",
           onClick: () => navigate("/factory"),
           icon: <ArrowRight className="w-5 h-5" />,
         }}
         secondaryCta={{
-          label: "Load demo",
-          onClick: loadDemo,
+          label: "Load sample campaign",
+          onClick: () => {
+            if (!isGenerating) void handleLoadSample();
+          },
           icon: <Zap className="w-4 h-4" />,
         }}
       />
 
+      <p role="status" className="mt-4 text-sm text-white/70 min-h-[1.25rem]">
+        {loadStatus}
+      </p>
+      {loadError && (
+        <p role="alert" className="mt-2 text-sm text-red-light">
+          {loadError}
+        </p>
+      )}
+
       {/* Stats */}
       <motion.div
-        className="grid grid-cols-2 lg:grid-cols-4 gap-5 mt-12"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-8"
         variants={containerVariants}
         initial="initial"
         animate="animate"
@@ -60,21 +87,15 @@ export function Command() {
         <StatCard
           icon={<Film className="w-5 h-5" />}
           value={stats.renders}
-          label="Ready renders"
-          sublabel={`${stats.renders} total jobs`}
-        />
-        <StatCard
-          icon={<Star className="w-5 h-5" />}
-          value={stats.avgScore > 0 ? stats.avgScore.toFixed(1) : "—"}
-          label="Avg viral score"
-          sublabel="Mock scoring model"
+          label="Render jobs"
+          sublabel="Sample queue entries"
         />
       </motion.div>
 
       {/* Campaign + Queue panels */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-10">
         <div className="lg:col-span-3">
-          <SectionHeader title="Active campaign" className="mb-6" />
+          <SectionHeader title="Current campaign" className="mb-6" />
           {activeCampaign ? (
             <Card className="p-8">
               <p className="text-label text-gray-mid mb-3">Current product</p>
@@ -84,20 +105,20 @@ export function Command() {
               <p className="text-gray-mid text-sm leading-relaxed mb-6 line-clamp-2">
                 {activeCampaign.product_description}
               </p>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <Button
                   variant="primary"
                   size="sm"
                   onClick={() => navigate("/scripts")}
                 >
-                  View scripts
+                  Review scripts
                 </Button>
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={() => navigate("/renders")}
                 >
-                  View renders
+                  Sample render queue
                 </Button>
               </div>
             </Card>
@@ -106,20 +127,20 @@ export function Command() {
               <TrendingUp className="w-10 h-10 text-gray-light mb-4" />
               <p className="font-medium text-black mb-1">No campaign yet</p>
               <p className="text-sm text-gray-mid max-w-xs">
-                Use the factory to create a product-specific content engine, or
-                load the demo campaign.
+                Use the factory to plan a campaign from a product brief, or load
+                the sample campaign.
               </p>
             </Card>
           )}
         </div>
 
         <div className="lg:col-span-2">
-          <SectionHeader title="Latest render queue" className="mb-6" />
+          <SectionHeader title="Sample render queue" className="mb-6" />
           <Card className="p-8 min-h-[160px] flex flex-col items-center justify-center text-center">
             <Film className="w-8 h-8 text-gray-light mb-3" />
             <p className="text-sm text-gray-mid">
               {stats.renders > 0
-                ? `${stats.renders} jobs queued`
+                ? `${stats.renders} sample jobs · no video output`
                 : "Render jobs appear after campaign creation."}
             </p>
             {stats.renders > 0 && (
@@ -129,7 +150,7 @@ export function Command() {
                 className="mt-3 text-black"
                 onClick={() => navigate("/renders")}
               >
-                View all renders →
+                View sample queue →
               </Button>
             )}
           </Card>

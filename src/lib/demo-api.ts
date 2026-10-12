@@ -1,5 +1,5 @@
 import type { ApiCampaign, ApiScript, ApiRender, ApiStats, CreateCampaignPayload } from './api';
-import { buildMockCampaign, buildMockScripts, buildMockRenders, DEMO_CAMPAIGN_DATA } from './mock-data';
+import { buildMockCampaign, buildMockScripts, buildMockRenders, DEMO_CAMPAIGN_DATA, SAMPLE_SCORES } from './mock-data';
 
 let demoData: {
   campaigns: ApiCampaign[];
@@ -27,7 +27,7 @@ function toApiCampaign(campaign: ReturnType<typeof buildMockCampaign>): ApiCampa
   };
 }
 
-function toApiScript(script: ReturnType<typeof buildMockScripts>[0]): ApiScript {
+function toApiScript(script: ReturnType<typeof buildMockScripts>[0], index: number): ApiScript {
   return {
     id: script.id,
     campaign_id: script.campaignId,
@@ -35,7 +35,7 @@ function toApiScript(script: ReturnType<typeof buildMockScripts>[0]): ApiScript 
     body: script.body,
     cta: script.cta,
     status: script.status,
-    viral_score: Math.floor(Math.random() * 30) + 70,
+    viral_score: SAMPLE_SCORES[index % SAMPLE_SCORES.length],
     created_at: script.createdAt,
   };
 }
@@ -49,7 +49,8 @@ function toApiRender(render: ReturnType<typeof buildMockRenders>[0]): ApiRender 
     voice: render.voice,
     status: render.status,
     progress: render.progress,
-    video_url: render.status === 'complete' ? `https://example.com/video/${render.id}.mp4` : null,
+    // The browser demo never produces video, so it never exposes a video link.
+    video_url: null,
     video_url_portrait: null,
     video_url_square: null,
     video_url_landscape: null,
@@ -137,7 +138,7 @@ export const demoApi = {
   },
 
   watchRender: (
-    renderId: string,
+    _renderId: string,
     onUpdate: (data: {
       status: string;
       progress: number;
@@ -152,7 +153,7 @@ export const demoApi = {
         onUpdate({
           status: 'complete',
           progress: 100,
-          video_url: `https://example.com/video/${renderId}.mp4`,
+          video_url: null,
           error_message: null,
         });
         clearInterval(interval);

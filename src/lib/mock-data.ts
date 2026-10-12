@@ -1,10 +1,10 @@
 import type { Campaign, Script, Render, PipelineService, AppStats } from './types';
 
 export const PIPELINE_SERVICES: PipelineService[] = [
-  { name: 'Script LLM', status: 'online', description: 'Prompt guard controls repetition' },
-  { name: 'XTTS voice', status: 'online', description: 'Voice synthesis ready' },
-  { name: 'Talking head', status: 'online', description: 'Avatar renderer active' },
-  { name: 'FFmpeg render', status: 'online', description: 'FFmpeg handoff simulated' },
+  { name: 'Script model', status: 'example', description: 'Example stage · demo uses sample templates' },
+  { name: 'Voice', status: 'example', description: 'Example stage · not connected in demo' },
+  { name: 'Avatar', status: 'example', description: 'Example stage · not connected in demo' },
+  { name: 'Video render', status: 'example', description: 'Example stage · no video is produced' },
 ];
 
 export const EMPTY_STATS: AppStats = {
@@ -15,25 +15,28 @@ export const EMPTY_STATS: AppStats = {
 };
 
 const HOOKS = [
-  'Stop scrolling if you struggle with dull skin.',
-  "Tired of serums that promise everything and deliver nothing?",
-  "Here's why your skincare routine is failing you.",
-  'I used to spend $200/month on skincare. Not anymore.',
-  'This changed my skin in 30 days — and it\'s fragrance-free.',
-  'Derms won\'t tell you this. But this serum will.',
+  "What do you look for in a daily serum?",
+  "A closer look at this fictional vitamin C formula.",
+  "Read the ingredients before choosing your next serum.",
+  "A sample routine, built around a simple brief.",
+  "Fragrance-free is one detail to check.",
+  "Three things to ask before trying a new serum."
 ];
 
 const BODIES = [
-  'I found this lightweight vitamin C serum that actually works. Fragrance-free, absorbs in seconds, costs half what I used to pay.',
-  'Most serums are full of fillers. This one uses stable vitamin C and niacinamide — nothing else. My skin has never looked better.',
-  'I was skeptical too. But after 30 days my dark spots faded and my skin looks brighter. The secret? Consistent, simple ingredients.',
+  "This fictional brief describes stable vitamin C, niacinamide and a fragrance-free formula. The sample script repeats those supplied details; it is not a personal testimonial or evidence of results.",
+  "The audience wants ingredient clarity and a lightweight routine. Review the full ingredient list and instructions before deciding whether a real product would fit.",
+  "No clinical study, price comparison or customer result was supplied. A publishable script would need verified evidence for any performance claim."
 ];
 
 const CTAS = [
-  'Try it risk-free for 30 days.',
-  'Get 20% off your first order.',
-  'Join 10,000+ people who made the switch.',
+  "Read the ingredients and instructions.",
+  "Explore the product details before deciding.",
+  "See whether it fits your daily routine."
 ];
+
+// Illustrative sample scores, not predictions. Mirrors _SCORES in backend/app/providers/script/stub.py.
+export const SAMPLE_SCORES = [9.1, 8.7, 8.4, 8.1, 7.9, 7.3];
 
 export function buildMockCampaign(data: Partial<Campaign>): Campaign {
   return {
@@ -87,7 +90,7 @@ export const DEMO_CAMPAIGN_DATA: Partial<Campaign> = {
   targetAudience:
     'Busy women aged 25–40 who buy skincare from TikTok but still want ingredient credibility',
   claimsAndProof:
-    'Absorbs in under 30 seconds; visibly improves dullness; fragrance-free and sensitive-skin friendly',
+    'Fictional supplied attributes: stable vitamin C, niacinamide, fragrance-free. No clinical evidence, customer results, refund offer or comparative price was supplied.',
   scriptTone: 'casual-founder',
   voiceStyle: 'warm-authentic',
 };

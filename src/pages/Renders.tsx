@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useApp } from "@/context/AppContext";
+import { api } from "@/lib/api";
 import { itemVariants } from "@/lib/animations";
 
 const STATUS_BADGE: Record<
@@ -22,6 +23,7 @@ const STATUS_BADGE: Record<
 export function Renders() {
   const navigate = useNavigate();
   const { renders, scripts, activeCampaign } = useApp();
+  const isDemo = api.isDemo();
 
   function getScript(scriptId: string) {
     return scripts.find((s) => s.id === scriptId);
@@ -31,16 +33,16 @@ export function Renders() {
     <div>
       <SectionHeader
         eyebrow="Render Bay"
-        title="A production queue that looks like a creative department."
-        description="The queue models the handoff from scripts to TTS, talking head, B-roll, captions, audio ducking, and export packaging."
+        title="Sample render queue."
+        description="Each script maps to a render job. Avatar and voice names are examples; the backend pipeline hands jobs to speech, avatar, and storage stages, which the browser demo does not run."
         action={
           renders.length > 0 ? (
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => navigate("/exports")}
+              onClick={() => navigate("/scripts")}
             >
-              Export all →
+              ← Back to scripts
             </Button>
           ) : undefined
         }
@@ -48,9 +50,10 @@ export function Renders() {
 
       {activeCampaign && renders.length > 0 && (
         <div className="mb-8 px-4 py-3 border border-white/10 bg-white/5 flex items-center gap-3">
-          <Badge variant="warning">Queued</Badge>
+          <Badge variant="default">{isDemo ? "Sample" : "Queue"}</Badge>
           <span className="text-white/70 text-sm">
             {renders.length} render jobs · {activeCampaign.product_name}
+            {isDemo && " · no video is generated in the browser demo"}
           </span>
         </div>
       )}
@@ -62,8 +65,8 @@ export function Renders() {
             Render bay is empty
           </h3>
           <p className="text-white/50 text-sm max-w-sm mb-6">
-            Generate a campaign to create mock video jobs that can later be
-            connected to LivePortrait, XTTS, and FFmpeg.
+            Plan a campaign to see one sample render job per script. The demo
+            queue does not produce video.
           </p>
           <Button variant="primary" onClick={() => navigate("/factory")}>
             Go to factory
@@ -104,24 +107,20 @@ export function Renders() {
                   </div>
 
                   <div className="mt-auto pt-4 border-t border-gray-light">
-                    {render.status === "complete" ? (
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="w-full text-xs"
+                    {render.video_url ? (
+                      <a
+                        href={render.video_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-full items-center justify-center gap-1.5 px-4 py-2 text-xs font-medium tracking-wide bg-red-brand text-white hover:bg-red-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-brand"
                       >
                         <Download className="w-3 h-3" />
-                        Download
-                      </Button>
+                        Open video
+                      </a>
                     ) : (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="w-full text-xs border-black text-black hover:bg-black/5"
-                        disabled
-                      >
-                        Waiting…
-                      </Button>
+                      <p className="text-center text-xs text-gray-mid py-2">
+                        {isDemo ? "Sample job · no video output" : "No video yet"}
+                      </p>
                     )}
                   </div>
                 </Card>

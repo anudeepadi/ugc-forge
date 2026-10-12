@@ -1,5 +1,6 @@
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { MotionConfig } from 'framer-motion';
 import { AppProvider } from '@/context/AppContext';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { PageShell } from '@/components/layout/PageShell';
@@ -23,8 +24,9 @@ function NotFound() {
 export function App() {
   return (
     <AppProvider>
+      <MotionConfig reducedMotion="user">
       <BrowserRouter>
-        <div className="flex min-h-screen bg-black">
+        <div className="flex flex-col md:flex-row min-h-screen bg-black">
           <Sidebar />
           <PageShell>
             <Routes>
@@ -39,6 +41,7 @@ export function App() {
           </PageShell>
         </div>
       </BrowserRouter>
+      </MotionConfig>
     </AppProvider>
   );
 }

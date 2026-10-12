@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lightbulb, Film } from "lucide-react";
@@ -7,18 +8,21 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useApp } from "@/context/AppContext";
+import { api } from "@/lib/api";
 import { itemVariants } from "@/lib/animations";
 
 export function Scripts() {
   const navigate = useNavigate();
   const { scripts, activeCampaign } = useApp();
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
+  const isDemo = api.isDemo();
 
   return (
     <div>
       <SectionHeader
         eyebrow="Script Room"
-        title="Hooks, objections, and CTAs for testing."
-        description="Each script is formatted for short-form UGC: thumb-stop hook, creator-style body, and direct response CTA."
+        title="Review hooks, bodies, and CTAs."
+        description="Each draft is formatted for short-form UGC: opening hook, creator-style body, and call to action. Review each one before it moves to production."
         action={
           scripts.length > 0 ? (
             <Button
@@ -26,7 +30,7 @@ export function Scripts() {
               size="sm"
               onClick={() => navigate("/renders")}
             >
-              View renders →
+              Sample render queue →
             </Button>
           ) : undefined
         }
@@ -35,14 +39,16 @@ export function Scripts() {
       {activeCampaign && scripts.length > 0 && (
         <div className="mb-8 px-4 py-3 border border-white/10 bg-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Badge variant="success">Ready</Badge>
+            <Badge variant="default">{isDemo ? "Sample" : "Draft"}</Badge>
             <span className="text-white/70 text-sm">
               Campaign:{" "}
               <span className="text-white font-medium">
                 {activeCampaign.product_name}
               </span>
               {" · "}
-              {scripts.length} scripts generated
+              {isDemo
+                ? `${scripts.length} sample scripts from fixed skincare templates`
+                : `${scripts.length} draft scripts`}
             </span>
           </div>
         </div>
@@ -55,8 +61,8 @@ export function Scripts() {
             No scripts yet
           </h3>
           <p className="text-white/50 text-sm max-w-sm mb-6">
-            Create a campaign in the factory and the script room will fill with
-            UGC ad concepts.
+            Plan a campaign in the factory and its draft scripts will appear
+            here for review.
           </p>
           <Button variant="primary" onClick={() => navigate("/factory")}>
             Go to factory
@@ -64,7 +70,10 @@ export function Scripts() {
         </div>
       ) : (
         <ContentGrid columns={3} gap="md">
-          {scripts.map((script, i) => (
+          {scripts.map((script, i) => {
+            const isReviewing = reviewingId === script.id;
+            const bodyId = `script-body-${script.id}`;
+            return (
             <motion.div key={script.id} variants={itemVariants}>
               <Card hover className="p-6 h-full flex flex-col">
                 <div className="flex items-start justify-between mb-4">
@@ -81,11 +90,32 @@ export function Scripts() {
                       {script.hook}
                     </p>
                   </div>
-                  <div>
+                  <div id={bodyId}>
                     <p className="text-label text-gray-mid mb-1.5">Body</p>
-                    <p className="text-sm text-black/70 leading-relaxed line-clamp-3">
+                    <p
+                      className={`text-sm text-black/70 leading-relaxed ${isReviewing ? "" : "line-clamp-3"}`}
+                    >
                       {script.body}
                     </p>
+                    {isReviewing && activeCampaign && (
+                      <div className="mt-4 p-3 bg-black/5 text-xs text-black/80 space-y-2">
+                        <p className="text-label text-gray-mid">
+                          Check against the brief
+                        </p>
+                        <p>
+                          <span className="font-medium text-black">Audience: </span>
+                          {activeCampaign.target_audience || "Not specified in the brief."}
+                        </p>
+                        <p>
+                          <span className="font-medium text-black">Claims and proof: </span>
+                          {activeCampaign.claims_and_proof || "Not specified in the brief."}
+                        </p>
+                        <p>
+                          Remove any claim, number, or offer in the script that the
+                          brief cannot support.
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <p className="text-label text-gray-mid mb-1.5">CTA</p>
@@ -100,8 +130,11 @@ export function Scripts() {
                     variant="primary"
                     size="sm"
                     className="flex-1 text-xs"
+                    aria-expanded={isReviewing}
+                    aria-controls={bodyId}
+                    onClick={() => setReviewingId(isReviewing ? null : script.id)}
                   >
-                    Preview
+                    {isReviewing ? "Collapse" : "Review"}
                   </Button>
                   <Button
                     variant="secondary"
@@ -110,12 +143,13 @@ export function Scripts() {
                     onClick={() => navigate("/renders")}
                   >
                     <Film className="w-3 h-3" />
-                    Render
+                    In queue
                   </Button>
                 </div>
               </Card>
             </motion.div>
-          ))}
+            );
+          })}
         </ContentGrid>
       )}
     </div>

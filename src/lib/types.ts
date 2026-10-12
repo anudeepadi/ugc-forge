@@ -35,7 +35,7 @@ export interface Render {
 
 export interface PipelineService {
   name: string;
-  status: 'online' | 'offline' | 'warning';
+  status: 'online' | 'offline' | 'warning' | 'example';
   description: string;
 }
 

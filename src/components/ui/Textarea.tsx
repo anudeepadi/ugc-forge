@@ -22,7 +22,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           rows={rows}
           className={cn(
             'w-full px-4 py-3 bg-transparent border text-white/90 placeholder:text-white/30',
-            'focus:outline-none transition-colors duration-200 resize-y',
+            'transition-colors duration-200 resize-y',
             error ? 'border-red-brand' : 'border-white/20 focus:border-red-brand',
             className,
           )}

@@ -47,3 +47,7 @@ backend/.env.production
 
 # Build artifacts
 *.tsbuildinfo
+
+.vercel/
+.next/
+audit-production.json
